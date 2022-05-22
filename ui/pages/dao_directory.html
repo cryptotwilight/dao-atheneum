@@ -30,6 +30,12 @@
     <link href="../vendor/select2/select2.min.css" rel="stylesheet" media="all">
     <link href="../vendor/perfect-scrollbar/perfect-scrollbar.css" rel="stylesheet" media="all">
 
+    <script src="https://unpkg.com/ipfs-http-client-lite/dist/index.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ethjs@0.3.4/dist/ethjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
     <!-- Main CSS-->
     <link href="../css/theme.css" rel="stylesheet" media="all">
 
@@ -118,14 +124,15 @@
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
                         <div class="header-wrap">
-                        
+
                             <div class="header-button">
-                               
+
                                 <div class="account-wrap">
-                                    <div class="account-item clearfix js-item-menu">                            
+                                    <div class="account-item clearfix js-item-menu">
                                         <div class="content">
-                                             <button class="au-btn au-btn-icon au-btn--blue"> <i class="zmdi zmdi-account-circle"></i>Connect Web 3</button>
-                                        </div>                               
+                                            <button id="connect_web_3" class="au-btn au-btn-icon au-btn--blue"> <i class="zmdi zmdi-account-circle"></i>Connect Web 3</button>
+                                            <span id="show_wallet"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -147,57 +154,57 @@
                                         <div class="card-title">
                                             <h3 class="text-center title-2">Register Your DAO</h3>
                                             <small>You must ensure that you have the appropriate permissions to register your DAO</small>
+                                            <span id="show_register_message"></span>
                                         </div>
                                         <hr>
                                         <form action="" method="post" novalidate="novalidate">
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">Name of DAO</label>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" >
+                                                <label for="dao_name" class="control-label mb-1">Name of DAO</label>
+                                                <input id="dao_name" type="text" class="form-control" aria-required="true" aria-invalid="false">
                                             </div>
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">DAO Type</label>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" >
+                                                <label for="dao_type" class="control-label mb-1">DAO Type</label>
+                                                <input id="dao_type" type="text" class="form-control" aria-required="true" aria-invalid="false">
                                             </div>
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">DAO Short Description</label>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" >
+                                                <label for="dao_short_description" class="control-label mb-1">DAO Short Description</label>
+                                                <input id="dao_short_description" type="text" class="form-control" aria-required="true" aria-invalid="false">
                                             </div>
                                             <div class="row form-group">
                                                 <div class="col-12 col-md-12">
-                                                    <label for="textarea-input" class=" form-control-label">DAO Detailed Description</label>
-                                                    <textarea name="textarea-input" id="textarea-input" rows="9" placeholder="What does your DAO do?" class="form-control"></textarea>
+                                                    <label for="dao_detailed_description" class=" form-control-label">DAO Detailed Description</label>
+                                                    <textarea id="dao_detailed_description" rows="9" placeholder="What does your DAO do?" class="form-control"></textarea>
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">DAO Member Access Type</label>
-                                                <select id="member-access-type" class="form-control">
-                                                    <option id="erc721">NFT</option>
-                                                    <option id="erc721">Cryptocurrency</option>
-                                                </select>                                                
+                                                <label for="member_access_type" class="control-label mb-1">DAO Member Access Type</label>
+                                                <select id="member_access_type" class="form-control">
+                                                    <option value="nft">NFT</option>
+                                                    <option value="cryptocurrency">Cryptocurrency</option>
+                                                </select>
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">DAO Member Access EVM Contract</label>&nbsp;<small>Contract that we use to control access to your media</small>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0x...">
+                                                <label for="access_contract" class="control-label mb-1">DAO Member Access EVM Contract</label>&nbsp;<small>Contract that we use to control access to your media</small>
+                                                <input id="access_contract" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0x...">
                                             </div>
-                                            
+
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">Paid Media Price</label>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0.00">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">Paid Media Currency</label>&nbsp;<small>Currency users must use to get access to your media</small>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0x...">
+                                                <label for="paid_media_price" class="control-label mb-1">Paid Media Price</label>
+                                                <input id="paid_media_price" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0.00">
                                             </div>
                                             <div class="form-group">
-                                                <label for="cc-payment" class="control-label mb-1">DAO Wallet</label>&nbsp;<small>Where we send your payments to</small>
-                                                <input id="cc-pament" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0x...">
+                                                <label for="paid_media_currency" class="control-label mb-1">Paid Media Currency</label>&nbsp;<small>Currency users must use to get access to your media</small>
+                                                <input id="paid_media_currency" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0x...">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dao_wallet" class="control-label mb-1">DAO Wallet</label>&nbsp;<small>Where we send your payments to</small>
+                                                <input id="dao_wallet" type="text" class="form-control" aria-required="true" aria-invalid="false" placeholder="0x...">
                                             </div>
                                             <div>
-                                                <button id="payment-button" type="submit" class="btn btn-lg btn-info btn-block">
+                                                <button id="register_dao_button" type="submit" class="btn btn-lg btn-info btn-block">
                                                     <i class="fa fa-registered fa-lg"></i>&nbsp;
-                                                    <span id="payment-button-amount">Register DAO</span>
-                                                    <span id="payment-button-sending" style="display:none;">Sending…</span>
+                                                    <span>Register DAO</span>                                                    
                                                 </button>
                                             </div>
                                         </form>
@@ -208,18 +215,16 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <strong>Find DAO</strong>
-                                        
+
                                     </div>
                                     <div class="card-body card-block">
                                         <div class="row form-group">
                                             <div class="col col-md-12">
                                                 <div class="input-group">
                                                     <div class="input-group-btn">
-                                                        <button class="btn btn-primary">
-                                                            <i class="fa fa-search"></i> Search
-                                                        </button>
+                                                        <button id="find_dao_button" class="btn btn-primary"><i class="fa fa-search"></i> Search </button>
                                                     </div>
-                                                    <input type="text" id="input1-group2" name="input1-group2" placeholder="enter name of DAO" class="form-control">
+                                                    <input type="text" id="find_dao_field" name="input1-group2" placeholder="enter name of DAO" class="form-control">
                                                 </div>
                                             </div>
                                         </div>
@@ -237,63 +242,8 @@
                                                                 <th>Media Price</th>
                                                             </tr>
                                                         </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>2018-09-29 05:57</td>
-                                                                <td>Mobile</td>
-                                                                <td>iPhone X 64Gb Grey</td>
-                                                                <td class="process">Processed</td>
-                                                                <td>$999.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-28 01:22</td>
-                                                                <td>Mobile</td>
-                                                                <td>Samsung S8 Black</td>
-                                                                <td class="process">Processed</td>
-                                                                <td>$756.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-27 02:12</td>
-                                                                <td>Game</td>
-                                                                <td>Game Console Controller</td>
-                                                                <td class="denied">Denied</td>
-                                                                <td>$22.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-26 23:06</td>
-                                                                <td>Mobile</td>
-                                                                <td>iPhone X 256Gb Black</td>
-                                                                <td class="denied">Denied</td>
-                                                                <td>$1199.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-25 19:03</td>
-                                                                <td>Accessories</td>
-                                                                <td>USB 3.0 Cable</td>
-                                                                <td class="process">Processed</td>
-                                                                <td>$10.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-29 05:57</td>
-                                                                <td>Accesories</td>
-                                                                <td>Smartwatch 4.0 LTE Wifi</td>
-                                                                <td class="denied">Denied</td>
-                                                                <td>$199.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-24 19:10</td>
-                                                                <td>Camera</td>
-                                                                <td>Camera C430W 4k</td>
-                                                                <td class="process">Processed</td>
-                                                                <td>$699.00</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>2018-09-22 00:43</td>
-                                                                <td>Computer</td>
-                                                                <td>Macbook Pro Retina 2017</td>
-                                                                <td class="process">Processed</td>
-                                                                <td>$10.00</td>
-                                                            </tr>
+                                                        <tbody id="dao_results">
+
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -341,21 +291,103 @@
 
     <!-- Main JS-->
     <script src="../js/main.js"></script>
+    <script src="../js/i_dao_atheneum_abi.js"></script>
+    <script src="../js/dao_atheneum_connect.js"></script>
     <script>
+        const registerDAOButton = ge("register_dao_button");
+        registerDAOButton.addEventListener('click', registerDAO);
 
+        const findDAOButton = ge("find_dao_button");
+        findDAOButton.addEventListener('click', findDAO);
 
-        function registerDAO() { 
-
+        function loadPage() {
+            console.log("page loaded");
         }
 
-        function findDAO() { 
+        function registerDAO() {
+            var dao = {};
+            dao.name = ge("dao_name").value
+            dao.daoType = ge("dao_type").value;
+            dao.shortDescription = ge("dao_short_description").value;
+            dao.detailedDescription = ge("dao_detailed_description").value;
+            dao.memberAccessType = ge("member_access_type").value;
+            dao.accessContract = ge("access_contract").value;
+            dao.paidMediaPrice = ge("paid_media_price").value * 1e18;
+            dao.paymentCurrency = ge("paid_media_currency").value;
+            dao.paymentWallet = ge("dao_wallet").value;
+            dao.registrationDate = 0;
+            dao.registrationId = 0;
 
+            console.log(dao);
+
+            daoAtheneumContract.methods.registerDAO(dao).send({
+                    from: account
+                })
+                .then(function(response) {
+                    console.log(response);
+                    ge("show_register_message").innerHTML = response;
+                    clearFields();
+                })
+                .catch(function(err) {
+                    console.log(err);
+                })
         }
 
-        function displayDAOSearchResults() { 
-            
+        function clearFields() {
+            ge("dao_name").value = "";
+            ge("dao_type").value = "";
+            ge("dao_short_description").value = "";
+            ge("dao_detailed_description").value = "";
+            ge("member_access_type").value = "";
+            ge("access_contract").value = "";
+            ge("paid_media_price").value = "";
+            ge("paid_media_currency").value = "";
+            ge("dao_wallet").value = "";
         }
 
+        function findDAO() {
+            var daoName = ge("find_dao_field").value;
+            daoAtheneumContract.methods.findDAO(daoName).call({
+                    from: account
+                })
+                .then(function(response) {
+                    console.log(response);
+                    displayDAOSearchResults(response);
+                })
+                .catch(function(err) {
+                    console.log(err);
+
+                });
+        }
+
+        function displayDAOSearchResults(dao) {
+            var body = ge("dao_results");
+            var row = ce("tr");
+
+            var name = ce("td").append(text(dao.name));
+            var desc = ce("td").append(text(dao.shortDescription));
+            var count = ce("td").append(text(dao.name));
+            var price = ce("td").append(text(dao.paidMediaPrice));
+
+            row.append(name);
+            row.append(desc);
+            row.append(count);
+            row.append(price);
+
+            body.append(row);
+        }
+
+        function ge(element) {
+            return document.getElementById(element);
+        }
+
+        function ce(element) {
+            return document.createElement(element);
+        }
+
+        function text(txt) {
+            return document.createTextNode(txt);
+        }
     </script>
 </body>
 

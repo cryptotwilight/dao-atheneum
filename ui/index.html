@@ -30,6 +30,12 @@
     <link href="vendor/select2/select2.min.css" rel="stylesheet" media="all">
     <link href="vendor/perfect-scrollbar/perfect-scrollbar.css" rel="stylesheet" media="all">
 
+    <script src="https://unpkg.com/ipfs-http-client-lite/dist/index.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ethjs@0.3.4/dist/ethjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
     <!-- Main CSS-->
     <link href="css/theme.css" rel="stylesheet" media="all">
 
@@ -123,7 +129,8 @@
                                 <div class="account-wrap">
                                     <div class="account-item clearfix js-item-menu">
                                         <div class="content">
-                                            <button class="au-btn au-btn-icon au-btn--blue"> <i class="zmdi zmdi-account-circle"></i>Connect Web 3</button>
+                                            <button id="connect_web_3" class="au-btn au-btn-icon au-btn--blue"> <i class="zmdi zmdi-account-circle"></i>Connect Web 3</button>
+                                            <span id="show_wallet"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -148,7 +155,7 @@
                                             </div>
                                             <div class="text">
                                                 <h2>10368</h2>
-                                                <span>daoists online</span>
+                                                <span>daos registered</span>
                                             </div>
                                         </div>
                                     </div>
@@ -159,7 +166,7 @@
                                     <div class="overview__inner">
                                         <div class="overview-box clearfix">
                                             <div class="icon">
-                                                <i class="zmdi zmdi-file"></i>
+                                                <i class="zmdi zmdi-cloud-upload"></i>
                                             </div>
                                             <div class="text">
                                                 <h2>388,688</h2>
@@ -174,11 +181,11 @@
                                     <div class="overview__inner">
                                         <div class="overview-box clearfix">
                                             <div class="icon">
-                                                <i class="zmdi zmdi-cloud-upload"></i>
+                                                <i class="zmdi zmdi-cloud-download"></i>
                                             </div>
                                             <div class="text">
                                                 <h2>1,086</h2>
-                                                <span>uploads this week</span>
+                                                <span>paid media downloads</span>
                                             </div>
                                         </div>
                                     </div>
@@ -400,87 +407,12 @@
     <!-- Main JS-->
     <script src="js/main.js"></script>
     <script src="js/i_dao_atheneum_abi.js"></script>
-    <script>
-        const onboardButton = document.getElementById("connect_web_3");
-        const showWallet = document.getElementById("show_wallet");
+    <script src="js/dao_atheneum_connect.js"></script>
+   <script>
 
-        var account;
-        const web3 = new Web3(window.ethereum);
+        function loadPage() { 
 
-        const daoAtheneumAddress = "";
-        const daoAtheneumContract = new web3.eth.Contract(iDAOAtheneumAbi, daoAtheneumAddress);
-
-        const ipfs = window.IpfsHttpClientLite('https://ipfs.infura.io:5001')
-        const buffer = window.IpfsHttpClientLite.Buffer;
-        console.log("got ipfs: " + ipfs);
-
-        //Created check function to see if the MetaMask extension is installed
-        const isMetaMaskInstalled = () => {
-
-            const {
-                ethereum
-            } = window;
-            return Boolean(ethereum && ethereum.isMetaMask);
-        };
-
-        const MetaMaskClientCheck = () => {
-            //Now we check to see if Metmask is installed
-            if (!isMetaMaskInstalled()) {
-                console.log("metamask not installed");
-                //If it isn't installed we ask the user to click to install it
-                onboardButton.innerText = 'Click here to install MetaMask!';
-                //When the button is clicked we call this function
-                onboardButton.onclick = onClickInstall;
-                //The button is now disabled
-                onboardButton.disabled = false;
-            } else {
-                //If it is installed we change our button text
-                onboardButton.innerText = 'Click to Connect Metamask';
-
-                console.log("metamask installed");
-                onboardButton.addEventListener('click', () => {
-                    getAccount();
-                    onboardButton.innerText = "Web 3 Connected";
-                });
-            }
-        };
-        const initialize = () => {
-            MetaMaskClientCheck();
-        };
-
-        window.addEventListener('DOMContentLoaded', initialize);
-
-        async function getAccount() {
-            const accounts = await ethereum.request({
-                method: 'eth_requestAccounts'
-            });
-            account = accounts[0];
-            showWallet.innerHTML = "<b>Connected Wallet :: " + account + "</b>";
-            loadStats();
         }
-
-        //We create a new MetaMask onboarding object to use in our app
-        //const onboarding = new MetaMaskOnboarding({ forwarderOrigin });
-
-        //This will start the onboarding proccess
-        const onClickInstall = () => {
-            onboardButton.innerText = 'Onboarding in progress';
-            onboardButton.disabled = true;
-            //On this object we have startOnboarding which will start the onboarding process for our end user
-            onboarding.startOnboarding();
-        };
-
-        const onClickConnect = async() => {
-            try {
-                // Will open the MetaMask UI
-                // You should disable this button while the request is pending!
-                await ethereum.request({
-                    method: 'eth_requestAccounts'
-                });
-            } catch (error) {
-                console.error(error);
-            }
-        };
 
         function refreshStats() { 
 
@@ -501,7 +433,7 @@
         }
 
         function search() { 
-            
+
         }
 
     </script>
