@@ -124,14 +124,15 @@
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
                         <div class="header-wrap">
-                        
+
                             <div class="header-button">
-                               
+
                                 <div class="account-wrap">
-                                    <div class="account-item clearfix js-item-menu">                            
+                                    <div class="account-item clearfix js-item-menu">
                                         <div class="content">
-                                             <button class="au-btn au-btn-icon au-btn--blue"> <i class="zmdi zmdi-account-circle"></i>Connect Web 3</button>
-                                        </div>                               
+                                            <button id="connect_web_3" class="au-btn au-btn-icon au-btn--blue"> <i class="zmdi zmdi-account-circle"></i>Connect Web 3</button>
+                                            <span id="show_wallet"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -157,7 +158,7 @@
                                         <form action="" method="post" novalidate="novalidate">
                                             <div class="form-group">
                                                 <label for="media-title" class="control-label mb-1">Title</label>
-                                                <input id="media-title" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false" >
+                                                <input id="media-title" name="cc-payment" type="text" class="form-control" aria-required="true" aria-invalid="false">
                                             </div>
                                             <div class="form-group has-success">
                                                 <label for="media-type" class="control-label mb-1">Media Type</label>
@@ -173,7 +174,7 @@
                                                 <div class="col-6">
                                                     <div class="form-group">
                                                         <label for="user-daos" class="control-label mb-1">Owner DAO</label>
-                                                        <select id="user-daos" class="form-control">
+                                                        <select id="userdaos" class="form-control">
                                                             <option id="vita_dao">Vita DAO</option>
                                                             <option id="moloch_dao">Moloch DAO</option>
                                                         </select>
@@ -182,8 +183,8 @@
                                                 <div class="col-6">
 
                                                     <div class="form-group">
-                                                        <label for="user-daos" class="control-label mb-1">Public Access Type</label>
-                                                        <select id="user-daos" class="form-control">
+                                                        <label for="user_daos" class="control-label mb-1">Public Access Type</label>
+                                                        <select id="user_daos" class="form-control">
                                                             <option id="free">Free</option>
                                                             <option id="paid">Paid</option>
                                                         </select>
@@ -224,7 +225,7 @@
                             <div class="col-lg-6">
                                 <div class="card">
                                     <div class="card-header">
-                                        <strong>Completed Upload</strong>                                       
+                                        <strong>Completed Upload</strong>
                                     </div>
                                     <div class="card-body card-block">
                                         <div class="form-group">
@@ -234,7 +235,7 @@
                                         <div class="form-group">
                                             <label for="company" class=" form-control-label">IPFS Location</label>
                                             <input type="text" disabled="true" id="ipfs-location" placeholder="Enter your company name" class="form-control"><i class="fa-open"></i>
-                                        </div>                                        
+                                        </div>
                                         <div class="form-group">
                                             <label for="vat" class=" form-control-label">Media Type</label>
                                             <input type="text" disabled="true" id="media-type" placeholder="DE1234567890" class="form-control">
@@ -242,7 +243,7 @@
                                         <div class="form-group">
                                             <label for="street" class=" form-control-label">Media Categories</label>
                                             <input type="text" disabled="true" id="media-categories" placeholder="Enter street name" class="form-control">
-                                        </div>                      
+                                        </div>
                                         <div class="form-group">
                                             <label for="country" class=" form-control-label">Owner DAO</label>
                                             <input type="text" disabled="true" id="owner-dao" placeholder="Country name" class="form-control">
@@ -253,16 +254,16 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="country" class=" form-control-label">Search Categories</label>
-                                            <input type="text" disabled="true" id="search-categories"  class="form-control">
+                                            <input type="text" disabled="true" id="search-categories" class="form-control">
                                         </div>
                                         <div class="form-group">
                                             <label for="country" class=" form-control-label">Media Description</label>
-                                            <textarea type="text" disabled="true" id="media-description"  class="form-control"></textarea>
+                                            <textarea type="text" disabled="true" id="media-description" class="form-control"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                  
+
                         </div>
                         <div class="row">
                             <div class="col-md-12">
@@ -303,21 +304,62 @@
     <script src="../js/main.js"></script>
     <script src="../js/i_dao_atheneum_abi.js"></script>
 
-    <script> 
-        
-        function loadPage() { 
+    <script>
+        function loadPage() {
 
         }
 
-        function uploadMedia( ){
+        function uploadMedia() {
+
+            await ipfs.add(strfy(jobJSON.description))
+                .then(function(response) {
+                    console.log(response);
+                    var hash = response[0].hash;
+                    console.log(hash);
+                    saveToEVM(hash);
+                })
+                .catch(function(err) {
+                    console.log(err);
+                });
+        }
+
+        function saveToEVM(hash) {
+            var media = getMedia(hash);
+            daoAtheneumContract.methods.upload(media).send({
+                    from: account
+                })
+                .then(function(response) {
+                    console.log(response);
+
+                })
+                .catch(function(err) {
+                    console.log(err);
+                })
 
         }
+
+        function getMedia(hash) {
+            var media = {};
+            media.title = ge("").value;
+            media.mediaType = ge("").value;
+            media.categories = toArray(ge("").value);
+            media.terms = toArray(ge("").value);
+            media.ownerDAO = ge("").value;;
+            media.accessType = ge("").value;;
+            media.summary = ge("").value;;
+            media.description = ge("").value;
+            media.ipfsLocation = hash;
+            media.uploadDate = 0;
+            media.status = "";
+            media.mediaId = 0;
+        }
+
 
         function refreshCompletedDisplay() {
 
         }
 
-        function clearUploadFields() { 
+        function clearUploadFields() {
 
         }
 
@@ -325,6 +367,17 @@
 
         }
 
+        function ge(element) {
+            return document.getElementById(element);
+        }
+
+        function ce(element) {
+            return document.createElement(element);
+        }
+
+        function text(txt) {
+            return document.createTextNode(txt);
+        }
     </script>
 
 </body>
